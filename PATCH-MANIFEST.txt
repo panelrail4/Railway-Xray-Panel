@@ -1,13 +1,15 @@
-Railway-XPanel v1.1.2 -> v1.1.3 CLEAN PATCH
+Railway-XPanel v1.1.3 -> v1.1.4 CLEAN PATCH
 
-Fixes empty user links and the subscription error:
-"No enabled inbound can produce a Railway-compatible link."
+Apply directly to the root of a v1.1.3 project and overwrite existing files.
+This patch contains only files changed in v1.1.4.
 
-The patch makes public-domain resolution fall back to Railway forwarded Host / X-Forwarded-Host when RAILWAY_PUBLIC_DOMAIN is not visible to the backend process. User links, QR links, and subscription creation now pass the incoming request host through the resolver.
+Main fix:
+- FastAPI startup crash caused by Request | None annotations on non-route helper
+  functions in subscriptions.py.
+- Request is now injected only by route handlers and passed to helper functions.
 
-Extract directly into the v1.1.2 project root and replace existing files.
-
-Changed files:
-- backend/app/railway_domain.py
-- backend/app/api/subscriptions.py
+Files:
+- CHANGELOG.md
+- VERSION
 - backend/app/api/qr.py
+- backend/app/api/subscriptions.py

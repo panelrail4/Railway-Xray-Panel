@@ -1,6 +1,11 @@
 # Changelog
 
-## 1.1.0
+## 1.1.4
+- Fixed FastAPI startup failure caused by Request annotations on helper functions.
+- Request is now injected only into FastAPI route handlers and passed explicitly to link-generation helpers.
+- QR, user-link, one-link, and subscription endpoints preserve Railway public-domain fallback resolution.
+
+1.1.0
 - Reworked Railway HTTP ingress to preserve the proven XHTTP-over-Railway model from Xhttp-main: client TLS/SNI terminates at Railway Edge and Xray receives clear HTTP inside the container.
 - HTTP transports (XHTTP/WS/gRPC/HTTPUpgrade) always generate Railway Public Domain links instead of incorrectly selecting the raw TCP Proxy endpoint.
 - Nginx now reloads automatically after inbound changes.
