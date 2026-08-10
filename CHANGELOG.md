@@ -15,3 +15,9 @@
 - Fixed inbound creation failure when no panel users exist by adding a non-advertised bootstrap VLESS client.
 - Made inbound creation normalize transport/security values and validate Nginx before restarting Xray.
 - Improved rollback and surfaced exact backend errors in the Inbounds page.
+
+## 1.1.2
+- Fixed inbound creation flow and exposed exact Xray/Nginx errors.
+- Restored XHTTP defaults from the working Xhttp-main template (`/xray`, mode `auto`).
+- Added explicit VLESS `encryption: none` and omitted empty client flow.
+- Fixed schema defaults and response listen_host.
