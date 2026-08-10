@@ -1,6 +1,6 @@
 import io
 import qrcode
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -20,10 +20,10 @@ def _png(text: str):
 
 
 @router.get('/link')
-def qr_link(user_id: int, inbound_id: int, variant: str = 'edge-tls', db: Session = Depends(get_db), _=Depends(require_admin)):
+def qr_link(user_id: int, inbound_id: int, variant: str = 'edge-tls', request: Request | None = None, db: Session = Depends(get_db), _=Depends(require_admin)):
     user = db.get(User, user_id); inbound = db.get(Inbound, inbound_id)
     if not user or not inbound: raise HTTPException(404, 'User or inbound not found')
-    return _png(make_uri(user, inbound, variant))
+    return _png(make_uri(user, inbound, variant, request))
 
 
 @router.get('/subscription/{token}')
