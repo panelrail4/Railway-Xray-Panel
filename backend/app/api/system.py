@@ -1,4 +1,5 @@
 import os
+from ..railway_domain import get_public_domain
 from fastapi import APIRouter, Depends
 from ..security import require_admin
 from ..xray.manager import manager
@@ -8,7 +9,7 @@ def capabilities(_=Depends(require_admin)):
     tcp_domain=os.getenv("RAILWAY_TCP_PROXY_DOMAIN"); tcp_port=os.getenv("RAILWAY_TCP_PROXY_PORT")
     return {
       "environment":"railway" if os.getenv("RAILWAY_ENVIRONMENT_NAME") else "generic",
-      "public_domain":os.getenv("RAILWAY_PUBLIC_DOMAIN") or os.getenv("PUBLIC_HOST"),
+      "public_domain":get_public_domain(),
       "private_domain":os.getenv("RAILWAY_PRIVATE_DOMAIN"),
       "tcp_proxy":bool(tcp_domain and tcp_port),
       "tcp_proxy_domain":tcp_domain,
