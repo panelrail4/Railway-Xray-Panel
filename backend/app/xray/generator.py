@@ -7,10 +7,12 @@ from .transports import validate_combination
 from .reality import reality_parameters
 
 
-def _railway_edge_mode() -> bool:
-    return bool(settings.RAILWAY_EDGE_TLS and not (
-        os.getenv('RAILWAY_TCP_PROXY_DOMAIN') and os.getenv('RAILWAY_TCP_PROXY_PORT')
-    ))
+def _railway_edge_mode(inbound: Inbound) -> bool:
+    return bool(
+        settings.RAILWAY_EDGE_TLS
+        and (inbound.transport or '').lower() in ('xhttp', 'websocket', 'grpc', 'httpupgrade')
+        and os.getenv('PORT')
+    )
 
 
 def build_stream(inbound: Inbound) -> dict:
@@ -39,7 +41,7 @@ def build_stream(inbound: Inbound) -> dict:
     if inbound.security == 'tls':
         # On Railway Public Networking, TLS is terminated at the edge. The
         # client link remains TLS, while the Xray origin is cleartext.
-        if _railway_edge_mode():
+        if _railway_edge_mode(inbound):
             stream['security'] = 'none'
         else:
             tls = custom.get('tlsSettings', {})

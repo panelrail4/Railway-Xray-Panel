@@ -116,4 +116,16 @@ def write_nginx_config(db: Session):
     ]
     NGINX_CONF.parent.mkdir(parents=True, exist_ok=True)
     NGINX_CONF.write_text('\n'.join(lines), encoding='utf-8')
+    # During FastAPI startup nginx may not be running yet. After an inbound
+    # is created/changed while nginx is live, reload it immediately so the
+    # new path becomes reachable without restarting the whole container.
+    import subprocess
+    test = subprocess.run(['nginx', '-t'], capture_output=True, text=True)
+    if test.returncode != 0:
+        raise RuntimeError(test.stderr[-4000:] or test.stdout[-4000:] or 'nginx configuration test failed')
+    running = subprocess.run(['sh', '-c', 'pgrep -x nginx >/dev/null 2>&1'], capture_output=True)
+    if running.returncode == 0:
+        reload_result = subprocess.run(['nginx', '-s', 'reload'], capture_output=True, text=True)
+        if reload_result.returncode != 0:
+            raise RuntimeError(reload_result.stderr[-4000:] or reload_result.stdout[-4000:] or 'nginx reload failed')
     return True
