@@ -39,7 +39,8 @@ def create_inbound(data: InboundCreate, db: Session = Depends(get_db), _=Depends
     if path and not path.startswith('/'):
         path = '/' + path
 
-    transport = data.transport.lower()
+    transport = data.transport.lower().strip()
+    security = data.security.lower().strip()
     listen_host = data.listen_host
     if transport in ('xhttp', 'websocket', 'grpc', 'httpupgrade'):
         # Public HTTP traffic terminates at Railway and is dispatched by Nginx.
@@ -47,22 +48,37 @@ def create_inbound(data: InboundCreate, db: Session = Depends(get_db), _=Depends
         listen_host = '127.0.0.1'
 
     i = Inbound(
-        name=data.name.strip(), protocol=data.protocol,
-        transport=transport, security=data.security,
+        name=data.name.strip(), protocol=data.protocol.lower().strip(),
+        transport=transport, security=security,
         listen_host=listen_host, listen_port=requested_port, path=path, flow=data.flow,
         settings_json=json.dumps(data.settings or {}),
     )
     db.add(i); db.commit(); db.refresh(i)
     try:
+        # Generate/test the reverse-proxy configuration before starting Xray.
+        # This makes the create operation atomic from the panel's perspective.
+        write_nginx_config(db)
         result = rebuild_and_restart(db)
         if result.get('status') == 'error':
-            db.delete(i); db.commit(); rebuild_and_restart(db)
-            raise HTTPException(422, result.get('error'))
-        write_nginx_config(db)
+            db.delete(i); db.commit()
+            try:
+                write_nginx_config(db)
+            except Exception:
+                pass
+            rebuild_and_restart(db)
+            raise HTTPException(422, result.get('error') or 'Xray failed to start')
     except HTTPException:
         raise
     except Exception as e:
-        db.delete(i); db.commit(); rebuild_and_restart(db)
+        db.delete(i); db.commit()
+        try:
+            write_nginx_config(db)
+        except Exception:
+            pass
+        try:
+            rebuild_and_restart(db)
+        except Exception:
+            pass
         raise HTTPException(500, str(e))
     return i
 
