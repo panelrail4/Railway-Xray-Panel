@@ -10,3 +10,8 @@
 - SSH continues to listen on the internal SSH_PORT (default 2222) and can be exposed through Railway TCP Proxy.
 - Fixed startup ordering and health behavior so the panel, Xray and Nginx can coexist reliably.
 - Automatic Railway domain provisioning remains supported through Railway's official GraphQL API when RAILWAY_API_TOKEN is supplied.
+
+## 1.1.1
+- Fixed inbound creation failure when no panel users exist by adding a non-advertised bootstrap VLESS client.
+- Made inbound creation normalize transport/security values and validate Nginx before restarting Xray.
+- Improved rollback and surfaced exact backend errors in the Inbounds page.
