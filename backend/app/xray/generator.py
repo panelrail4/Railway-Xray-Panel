@@ -1,4 +1,4 @@
-import json, os, tempfile
+import json, os, tempfile, uuid
 from pathlib import Path
 from ..models.user import User
 from ..models.inbound import Inbound
@@ -72,6 +72,12 @@ def build_stream(inbound: Inbound) -> dict:
     return stream
 
 
+def _bootstrap_uuid(inbound: Inbound) -> str:
+    # Xray/VLESS must have at least one client in a number of Xray builds.
+    # Keep a non-advertised bootstrap UUID so an inbound can be created before
+    # the administrator creates the first real panel user.
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"railway-xpanel:{inbound.id}:{inbound.name}"))
+
 def build_inbound(inbound: Inbound, users: list[User]) -> dict:
     validate_combination(inbound.transport, inbound.security)
     vusers = []
@@ -79,15 +85,23 @@ def build_inbound(inbound: Inbound, users: list[User]) -> dict:
         if not u.enabled:
             continue
         item = {'id': u.uuid, 'level': 0, 'email': u.username}
-        if inbound.flow:
-            item['flow'] = inbound.flow
+        if inbound.flow and inbound.flow.strip():
+            item['flow'] = inbound.flow.strip()
         vusers.append(item)
+
+    if not vusers:
+        vusers.append({
+            'id': _bootstrap_uuid(inbound),
+            'level': 0,
+            'email': f'__bootstrap__:{inbound.id}',
+        })
+
     return {
         'tag': inbound.name,
         'listen': inbound.listen_host,
         'port': inbound.listen_port,
         'protocol': inbound.protocol,
-        'settings': {'clients': vusers, 'decryption': 'none'},
+        'settings': {'clients': vusers, 'decryption': 'none', 'encryption': 'none'},
         'streamSettings': build_stream(inbound),
         'sniffing': {'enabled': False},
     }
