@@ -13,15 +13,30 @@ from ..railway_domain import get_public_domain
 router = APIRouter(tags=['subscriptions'])
 
 
-def endpoint():
+def endpoint(inbound: Inbound):
+    """Return the correct public endpoint for the selected transport.
+
+    Railway HTTP Public Networking is the compatibility path for XHTTP/WS/
+    gRPC/HTTPUpgrade: the client connects with TLS/SNI to the Railway domain,
+    Railway terminates HTTPS, and Nginx forwards clear HTTP to Xray. A raw TCP
+    Proxy is used only for transports that actually need raw TCP (for example
+    REALITY or a direct TCP/TLS inbound).
+    """
+    transport = (inbound.transport or '').lower()
     tcp_domain = os.getenv('RAILWAY_TCP_PROXY_DOMAIN')
     tcp_port = os.getenv('RAILWAY_TCP_PROXY_PORT')
+    public = get_public_domain()
+
+    if transport in ('xhttp', 'websocket', 'grpc', 'httpupgrade'):
+        if public:
+            return public, 443, 'railway'
+        raise HTTPException(409, 'Railway Public Domain is not available yet.')
+
     if tcp_domain and tcp_port:
         return tcp_domain, int(tcp_port), 'tcp'
-    public = get_public_domain()
     if public:
         return public, 443, 'railway'
-    raise HTTPException(409, 'Railway public domain is not available yet. Generate a Railway domain or provide RAILWAY_API_TOKEN for automatic provisioning.')
+    raise HTTPException(409, 'No public endpoint is available.')
 
 
 def _client_security(inbound: Inbound) -> str:
@@ -32,7 +47,7 @@ def _client_security(inbound: Inbound) -> str:
 
 
 def make_uri(user: User, inbound: Inbound, variant: str = 'default'):
-    host, port, kind = endpoint()
+    host, port, kind = endpoint(inbound)
     security = _client_security(inbound)
 
     if security == 'reality' and kind != 'tcp':

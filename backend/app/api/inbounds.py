@@ -39,10 +39,17 @@ def create_inbound(data: InboundCreate, db: Session = Depends(get_db), _=Depends
     if path and not path.startswith('/'):
         path = '/' + path
 
+    transport = data.transport.lower()
+    listen_host = data.listen_host
+    if transport in ('xhttp', 'websocket', 'grpc', 'httpupgrade'):
+        # Public HTTP traffic terminates at Railway and is dispatched by Nginx.
+        # Xray must not bind the public $PORT itself.
+        listen_host = '127.0.0.1'
+
     i = Inbound(
         name=data.name.strip(), protocol=data.protocol,
-        transport=data.transport, security=data.security,
-        listen_port=requested_port, path=path, flow=data.flow,
+        transport=transport, security=data.security,
+        listen_host=listen_host, listen_port=requested_port, path=path, flow=data.flow,
         settings_json=json.dumps(data.settings or {}),
     )
     db.add(i); db.commit(); db.refresh(i)
