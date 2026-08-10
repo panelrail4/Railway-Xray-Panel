@@ -1,0 +1,22 @@
+Railway-XPanel v1.0.9 -> v1.0.10 Patch
+
+Apply this patch ON TOP OF an unmodified v1.0.9 project.
+Copy/extract the contents of this ZIP directly into the root of the v1.0.9 project,
+allowing files to be replaced.
+
+Changed/new files:
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/.env.example
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/CHANGELOG.md
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/RAILWAY-DOMAIN-AUTO.md
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/VERSION
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/api/subscriptions.py
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/api/system.py
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/config.py
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/main.py
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/railway_domain.py
+- Railway-XPanel-RAILWAY-FINAL-v1.0.9/frontend/src/pages/Dashboard.vue
+
+Important:
+- This patch contains only files that differ between v1.0.9 and v1.0.10.
+- It does not contain unchanged project files.
+- Back up v1.0.9 before applying the patch.

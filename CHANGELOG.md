@@ -26,3 +26,10 @@
 - Documented Railway limitation: public domains are HTTP/HTTPS and cannot provide raw SSH on external port 2233.
 - Kept native SSH through Railway TCP Proxy as the primary fallback.
 - Added optional `SSH_PUBLIC_LABEL_PORT=2233` as a documentation/label variable; it does not override Railway's externally assigned TCP proxy port.
+
+## 1.0.10
+- Fixed fatal `NameError: get_db is not defined` in subscriptions API.
+- Added Railway public-domain bootstrap using the official GraphQL API when `RAILWAY_API_TOKEN` is available.
+- Uses Railway-provided `RAILWAY_PUBLIC_DOMAIN` automatically when a domain already exists.
+- Persists an API-created domain to `/data/railway_public_domain`.
+- Subscription/link generation now uses the resolved domain consistently.
