@@ -1,22 +1,13 @@
-Railway-XPanel v1.0.9 -> v1.0.10 Patch
+Railway-XPanel v1.1.2 -> v1.1.3 CLEAN PATCH
 
-Apply this patch ON TOP OF an unmodified v1.0.9 project.
-Copy/extract the contents of this ZIP directly into the root of the v1.0.9 project,
-allowing files to be replaced.
+Fixes empty user links and the subscription error:
+"No enabled inbound can produce a Railway-compatible link."
 
-Changed/new files:
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/.env.example
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/CHANGELOG.md
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/RAILWAY-DOMAIN-AUTO.md
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/VERSION
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/api/subscriptions.py
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/api/system.py
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/config.py
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/main.py
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/backend/app/railway_domain.py
-- Railway-XPanel-RAILWAY-FINAL-v1.0.9/frontend/src/pages/Dashboard.vue
+The patch makes public-domain resolution fall back to Railway forwarded Host / X-Forwarded-Host when RAILWAY_PUBLIC_DOMAIN is not visible to the backend process. User links, QR links, and subscription creation now pass the incoming request host through the resolver.
 
-Important:
-- This patch contains only files that differ between v1.0.9 and v1.0.10.
-- It does not contain unchanged project files.
-- Back up v1.0.9 before applying the patch.
+Extract directly into the v1.1.2 project root and replace existing files.
+
+Changed files:
+- backend/app/railway_domain.py
+- backend/app/api/subscriptions.py
+- backend/app/api/qr.py
