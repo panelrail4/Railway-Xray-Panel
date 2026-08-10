@@ -13,7 +13,7 @@ const transportInfo=computed(()=>({
  httpupgrade:'HTTPUpgrade با مسیر اختصاصی؛ پشتیبانی Edge/کلاینت باید بررسی شود.'
 }[form.value.transport]||''))
 async function load(){if(!localStorage.token){router.push('/login');return};try{items.value=(await axios.get('/api/inbounds',{headers:headers()})).data}catch(e){error.value=e.response?.data?.detail||'Load failed'}}
-async function add(){try{error.value='';await axios.post('/api/inbounds',form.value,{headers:headers()});await load()}catch(e){error.value=e.response?.data?.detail||'Create failed'}}
+async function add(){try{error.value='';await axios.post('/api/inbounds',form.value,{headers:headers()});await load()}catch(e){error.value=typeof e.response?.data?.detail==='string'?e.response.data.detail:(e.response?.data?.detail?.[0]?.msg||JSON.stringify(e.response?.data)||e.message||'Create failed')}}
 async function remove(id){if(confirm('Delete inbound?')){await axios.delete(`/api/inbounds/${id}`,{headers:headers()});await load()}}
 onMounted(load)
 </script>
