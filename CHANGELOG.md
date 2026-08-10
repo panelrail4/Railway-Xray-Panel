@@ -1,35 +1,12 @@
-# 1.0.7
+# Changelog
 
-- Rebuilt around the working `Xhttp-main` Railway model: client-side TLS/SNI at Railway Edge, Xray origin without TLS.
-- Corrected Xray VLESS inbound key to `settings.clients`.
-- Corrected Xray transport field to `streamSettings.network`.
-- Added Nginx path dispatch for XHTTP, WebSocket, HTTPUpgrade and gRPC.
-- Added anti-buffering / long-timeout settings for HTTP transports.
-- Added per-user, per-inbound TLS and plain variants.
-- Added QR generation for individual links and subscriptions.
-- Added Railway-focused UI guidance and deployment documentation.
-- Pinned Xray 26.6.27 instead of using a moving `latest` URL.
-
-## 1.0.8 — Ubuntu 24.04 + SSH administration
-- Runtime image changed from `python:3.12-slim` to **Ubuntu 24.04**.
-- Added OpenSSH Server with configurable SSH port (default `2222`).
-- Added root SSH login and a configurable non-root sudo user.
-- Added password configuration through Railway variables: `SSH_ROOT_PASSWORD`, `SSH_USER`, `SSH_USER_PASSWORD`.
-- If passwords are omitted, strong credentials are generated and stored at `/data/ssh/generated_credentials.txt`.
-- Added common Ubuntu administration/networking/development tools: git, curl, wget, nano, vim, jq, iproute2, ping, DNS tools, traceroute, tcpdump, lsof, htop, rsync, socat, netcat, openssl and build-essential.
-- Python dependencies now run in `/opt/venv` to remain compatible with Ubuntu 24.04's externally-managed Python environment.
-- Existing XPanel, Xray, Nginx, users, inbounds, subscriptions, links and QR functionality is retained.
-
-## 1.0.9
-- Preserved Ubuntu 24.04 runtime, XPanel, Xray transports, subscriptions, QR and SSH.
-- Added explicit dual-path SSH networking documentation.
-- Documented Railway limitation: public domains are HTTP/HTTPS and cannot provide raw SSH on external port 2233.
-- Kept native SSH through Railway TCP Proxy as the primary fallback.
-- Added optional `SSH_PUBLIC_LABEL_PORT=2233` as a documentation/label variable; it does not override Railway's externally assigned TCP proxy port.
-
-## 1.0.10
-- Fixed fatal `NameError: get_db is not defined` in subscriptions API.
-- Added Railway public-domain bootstrap using the official GraphQL API when `RAILWAY_API_TOKEN` is available.
-- Uses Railway-provided `RAILWAY_PUBLIC_DOMAIN` automatically when a domain already exists.
-- Persists an API-created domain to `/data/railway_public_domain`.
-- Subscription/link generation now uses the resolved domain consistently.
+## 1.1.0
+- Reworked Railway HTTP ingress to preserve the proven XHTTP-over-Railway model from Xhttp-main: client TLS/SNI terminates at Railway Edge and Xray receives clear HTTP inside the container.
+- HTTP transports (XHTTP/WS/gRPC/HTTPUpgrade) always generate Railway Public Domain links instead of incorrectly selecting the raw TCP Proxy endpoint.
+- Nginx now reloads automatically after inbound changes.
+- XHTTP proxying uses HTTP/1.1, disabled request/response buffering and long-lived timeouts.
+- Xray HTTP transport listeners are bound privately behind Nginx; raw/TCP listeners remain available for TCP Proxy use.
+- Ubuntu 24.04 remains the actual runtime image with OpenSSH, sudo and administration/networking tools.
+- SSH continues to listen on the internal SSH_PORT (default 2222) and can be exposed through Railway TCP Proxy.
+- Fixed startup ordering and health behavior so the panel, Xray and Nginx can coexist reliably.
+- Automatic Railway domain provisioning remains supported through Railway's official GraphQL API when RAILWAY_API_TOKEN is supplied.

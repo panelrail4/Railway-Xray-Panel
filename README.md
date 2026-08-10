@@ -100,3 +100,18 @@ Subscription فقط inboundهایی را که بتوانند لینک سازگا
 The runtime image is Ubuntu 24.04 and includes OpenSSH plus common administration and networking tools. SSH listens internally on `2222` by default. To reach it from the internet, create a Railway TCP Proxy targeting internal port `2222`; the HTTP Public Domain remains dedicated to XPanel and the HTTP-based Xray transports.
 
 Configure `SSH_USER`, `SSH_ROOT_PASSWORD`, `SSH_USER_PASSWORD`, and `SSH_PORT` as Railway variables. See `RAILWAY-SSH-UBUNTU.md` for the exact setup and the container-specific limitations compared with a full Ubuntu VPS.
+
+
+## XHTTP compatibility mode (v1.1.0)
+
+This release deliberately follows the working `Xhttp-main.zip` deployment model:
+
+`v2rayNG TLS ON + SNI=Railway Public Domain -> Railway HTTPS Edge -> Nginx -> Xray XHTTP (clear HTTP)`
+
+Do not use the Railway TCP Proxy endpoint for XHTTP/WS/gRPC/HTTPUpgrade links. The TCP Proxy is reserved for raw TCP/REALITY/direct TLS cases. Railway documents Public Networking as HTTP/HTTPS and TCP Proxy as raw TCP exposure.
+
+For the first test create exactly one inbound: `VLESS + XHTTP + TLS`, path `/xray` (or `/xhttp`), then use the generated `edge-tls` link. In v2rayNG TLS must be ON and SNI must equal the Railway Public Domain.
+
+## Ubuntu 24.04 / SSH
+
+The runtime image is `ubuntu:24.04`. OpenSSH Server runs inside the container on `SSH_PORT` (default `2222`). Create a Railway TCP Proxy targeting internal port `2222` to expose SSH externally. Railway assigns the external proxy port; `2233` can be used as the internal SSH port but cannot be forced as the Railway external TCP proxy port.
