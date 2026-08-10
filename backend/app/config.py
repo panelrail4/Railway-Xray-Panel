@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     REALITY_SERVER_NAME: str = ""
     REALITY_SHORT_ID: str = ""
     RAILWAY_EDGE_TLS: bool = True
+    RAILWAY_API_TOKEN: str = ""
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

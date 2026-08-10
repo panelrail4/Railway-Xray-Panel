@@ -10,8 +10,9 @@ from .config import settings
 from .xray.generator import build_config, write_atomic
 from .xray.manager import manager
 from .xray.nginx import write_nginx_config
+from .railway_domain import ensure_public_domain
 
-app = FastAPI(title="Railway XPanel", version="1.0.9")
+app = FastAPI(title="Railway XPanel", version="1.0.10")
 
 app.include_router(auth.router)
 app.include_router(users.router)
@@ -26,6 +27,7 @@ app.include_router(qr.router)
 
 @app.on_event("startup")
 def startup():
+    ensure_public_domain()
     init_db()
     db = SessionLocal()
     try:
