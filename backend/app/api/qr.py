@@ -1,6 +1,6 @@
 import io
 import qrcode
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -27,7 +27,7 @@ def qr_link(user_id: int, inbound_id: int, variant: str = 'edge-tls', request: R
 
 
 @router.get('/subscription/{token}')
-def qr_subscription(token: str, db: Session = Depends(get_db), _=Depends(require_admin)):
+def qr_subscription(token: str, request: Request, db: Session = Depends(get_db), _=Depends(require_admin)):
     sub = db.query(Subscription).filter(Subscription.token == token).first()
     if not sub: raise HTTPException(404, 'Subscription not found')
     user = db.get(User, sub.user_id)
@@ -35,5 +35,5 @@ def qr_subscription(token: str, db: Session = Depends(get_db), _=Depends(require
     # A subscription QR is represented by its first compatible link; clients
     # that support subscription URLs should use the text URL instead.
     from ..api.subscriptions import active_links
-    links = active_links(user, db)
+    links = active_links(user, db, request)
     return _png(links[0])

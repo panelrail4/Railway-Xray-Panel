@@ -13,7 +13,7 @@ from ..railway_domain import get_public_domain, resolve_public_domain
 router = APIRouter(tags=['subscriptions'])
 
 
-def endpoint(inbound: Inbound, request: Request | None = None):
+def endpoint(inbound: Inbound, request=None):
     """Return the correct public endpoint for the selected transport.
 
     Railway HTTP Public Networking is the compatibility path for XHTTP/WS/
@@ -46,7 +46,7 @@ def _client_security(inbound: Inbound) -> str:
     return (inbound.security or 'none').lower()
 
 
-def make_uri(user: User, inbound: Inbound, variant: str = 'default', request: Request | None = None):
+def make_uri(user: User, inbound: Inbound, variant: str = 'default', request=None):
     host, port, kind = endpoint(inbound, request)
     security = _client_security(inbound)
 
@@ -108,7 +108,7 @@ def make_uri(user: User, inbound: Inbound, variant: str = 'default', request: Re
     return f'vless://{user.uuid}@{host}:{port}?{query}#{quote(label)}'
 
 
-def active_links(user: User, db: Session, request: Request | None = None):
+def active_links(user: User, db: Session, request=None):
     inbounds = db.query(Inbound).filter(Inbound.enabled.is_(True)).order_by(Inbound.id.desc()).all()
     if not inbounds:
         raise HTTPException(409, 'No enabled inbound exists')
@@ -155,17 +155,17 @@ def user_links(user_id: int, request: Request, db: Session = Depends(get_db), _=
 
 
 @router.get('/api/users/{user_id}/inbounds/{inbound_id}/link')
-def one_link(user_id: int, inbound_id: int, variant: str = 'edge-tls', request: Request | None = None, db: Session = Depends(get_db), _=Depends(require_admin)):
+def one_link(user_id: int, inbound_id: int, request: Request, variant: str = 'edge-tls', db: Session = Depends(get_db), _=Depends(require_admin)):
     user = db.get(User, user_id); inbound = db.get(Inbound, inbound_id)
     if not user or not inbound: raise HTTPException(404, 'User or inbound not found')
     return {'uri': make_uri(user, inbound, variant, request), 'variant': variant}
 
 
 @router.get('/sub/{token}', response_class=PlainTextResponse)
-def subscription(token: str, db: Session = Depends(get_db)):
+def subscription(token: str, request: Request, db: Session = Depends(get_db)):
     sub = db.query(Subscription).filter(Subscription.token == token, Subscription.enabled.is_(True)).first()
     if not sub: raise HTTPException(404, 'Subscription not found')
     user = db.get(User, sub.user_id)
     if not user or not user.enabled: raise HTTPException(404, 'User disabled')
-    links = active_links(user, db, None)
+    links = active_links(user, db, request)
     return base64.b64encode(('\n'.join(links) + '\n').encode()).decode()
