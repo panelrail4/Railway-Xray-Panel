@@ -4,7 +4,7 @@ import axios from 'axios'
 import {useRouter} from 'vue-router'
 const router=useRouter()
 const items=ref([]); const error=ref('')
-const form=ref({name:'xhttp-tls',protocol:'vless',transport:'xhttp',security:'tls',listen_port:10000,path:'/xhttp',flow:null,settings:{}})
+const form=ref({name:'xhttp-tls',protocol:'vless',transport:'xhttp',security:'tls',listen_port:10000,path:'/xray',flow:null,settings:{}})
 const headers=()=>({Authorization:`Bearer ${localStorage.token}`})
 const transportInfo=computed(()=>({
  xhttp:'XHTTP: بهترین گزینه برای تست Railway در این پروژه؛ روی سرور بدون TLS و روی لینک با TLS/SNI دامنه Railway ساخته می‌شود.',
